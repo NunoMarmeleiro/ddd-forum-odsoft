@@ -1,0 +1,52 @@
+plugins {
+    id "com.github.node-gradle.node" version "7.0.0"
+}
+
+
+abstract class GreetingTask extends DefaultTask {
+    @Input
+    abstract Property<String> getGreeting()
+
+    GreetingTask() {
+        greeting.convention('hello from GreetingTask')
+    }
+
+    @TaskAction
+    def greet() {
+        println greeting.get()
+    }
+}
+
+
+task docsGeneration(type:Exec) {
+    workingDir "${project.projectDir}"
+    commandLine 'cmd', '/c', 'jsdoc -r src'
+    doLast {
+        println "Doc Generated"
+    }
+}
+
+task build(type:Exec) {
+    workingDir "${project.projectDir}"
+    commandLine 'cmd', '/c', 'gradle npm_run_build'
+    doLast  {
+        println "Project Built"
+    }
+}
+
+
+task printProjectDir {
+    doLast{
+        println "${project.projectDir}"
+    }
+}
+
+// Use the default greeting
+tasks.register('hello', GreetingTask)
+
+// Customize the greeting
+tasks.register('greeting',GreetingTask) {
+    greeting = 'greetings from GreetingTask'
+}
+
+
