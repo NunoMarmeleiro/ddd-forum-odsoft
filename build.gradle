@@ -20,9 +20,9 @@ abstract class GreetingTask extends DefaultTask {
 
 task docsGeneration(type:Exec) {
     workingDir "${project.projectDir}"
-    commandLine 'cmd', '/c', 'jsdoc -r src'
+    commandLine 'cmd', '/c', 'jsdoc -r dist'
     doLast {
-        println "Doc Generated"
+        println "Doc Generated using JS files"
     }
 }
 
@@ -49,4 +49,45 @@ tasks.register('greeting',GreetingTask) {
     greeting = 'greetings from GreetingTask'
 }
 
+task runUnitTests(type: Exec) {
+    workingDir "${project.projectDir}"
+    commandLine 'cmd', '/c', 'jest','--testPathIgnorePatterns=api'
+    doLast  {
+        println "Unit Tests"
+    }
+}
+
+
+
+
+task deleteDb(type:Exec){
+    workingDir "${project.projectDir}"
+    commandLine 'cmd', '/c', 'cross-env','NODE_ENV=development', 'node', 'scripts/db/delete'
+}
+
+task createDb(type:Exec){
+    workingDir "${project.projectDir}"
+    commandLine 'cmd', '/c', 'cross-env', 'NODE_ENV=development' ,'node' ,'scripts/db/create'
+}
+
+task migrateDb(type: Exec){
+    workingDir "${project.projectDir}"
+    commandLine 'cmd', '/c', 'npm', 'run', 'migrate:dev'
+}
+
+
+task startDocker(type:Exec){
+    workingDir "${project.projectDir}"
+    commandLine 'cmd', '/c', 'docker-compose up'
+}
+
+task runAPITests(type: Exec) {
+    workingDir "${project.projectDir}"
+    commandLine 'cmd', '/c', 'jest', '--coverage', '--coverageReporters=\"html\"', '--runInBand', '--testPathPattern=api'
+    dependsOn 'deleteDb'
+    dependsOn 'createDb'
+    dependsOn 'migrateDb'
+    tasks.findByName('createDb').mustRunAfter 'deleteDb'
+    tasks.findByName('migrateDb').mustRunAfter 'createDb'
+}
 
