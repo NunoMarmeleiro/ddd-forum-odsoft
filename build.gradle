@@ -28,7 +28,7 @@ task docsGeneration(type:Exec) {
 
 task build(type:Exec) {
     workingDir "${project.projectDir}"
-    commandLine 'cmd', '/c', 'gradle npm_run_build'
+    commandLine 'cmd', '/c', 'rimraf ./dist && tsc'
     doLast  {
         println "Project Built"
     }
@@ -91,3 +91,6 @@ task runAPITests(type: Exec) {
     tasks.findByName('migrateDb').mustRunAfter 'createDb'
 }
 
+task runAPITestsWithCoverage(type:Exec){
+    dependsOn 'runAPITests'
+}
